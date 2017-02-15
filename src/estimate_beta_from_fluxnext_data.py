@@ -61,67 +61,76 @@ class FitFluxnetBeta(object):
 
         df_site_info = pd.read_csv(self.site_fname, encoding="ISO-8859-1")
 
-        site = "US-Ha1"
-        year = "1998"
-        fname = os.path.join(self.flux_dir,
-                             "%s.%s.synth.hourly.allvars.csv" % (site, year))
-        (site, yr, lat, lon,
-         pft, clim_cl, clim_grp,
-         name, country) = self.get_site_info(df_site_info, fname)
-
-        #print (site, yr, lat, lon, pft, clim_cl, clim_grp, name, country)
-        df = pd.read_csv(fname, index_col='date',
-                         parse_dates={'date': ["Year","DoY","Time"]},
-                         date_parser=self.date_converter)
-
-        # files contain a rouge date from the following year, fix it.
-        df = self.fix_rogue_date(df, drop=True)
-
-        # Convert some units.
-        df['VPD_f'] *= self.HPA_TO_KPA # kPa
-
-        # mm / 30 min
-        df["ET"] = (df['LE_f'] * self.WM2_TO_KG_M2_S * self.SEC_2_HFHR)
-
-        (ppt, et, sw) = self.estimate_soil_water_bucket(df)
-
-        et_max = et.max()
-        et_relative = et / et_max
+        #site = "US-Ha1"
+        site = "AU-Tum"
+        #year = "1998"
+        #fname = os.path.join(self.flux_dir,
+        #                     "%s.%s.synth.hourly.allvars.csv" % (site, year))
 
         big_et_store = []
         big_sw_store = []
-        i = 0
-        N = 10
-        while (i < len(ppt)-(N*2)):
+        for fname in glob.glob(os.path.join(self.flux_dir,
+                               "%s.*.synth.hourly.allvars.csv" % (site))):
 
-            # Find rain event
-            if ppt[i] > 0.0:
 
-                # check if we have at least N days without rain. The N is
-                # arbitary
-                for j in range(i, i+N):
-                    if ppt[j] > 0.0:
-                        i = j
-                        continue
-                else:
-                    # ignore the 2 days following rain to minimise soil evap
-                    # contributions
 
-                    et_store = []
-                    sw_store = []
-                    for j in range(i+2, i+N):
+            (site, yr, lat, lon,
+             pft, clim_cl, clim_grp,
+             name, country) = self.get_site_info(df_site_info, fname)
 
-                        #print(sw[j], et_relative[j])
-                        et_store.append(et_relative[j])
-                        sw_store.append(sw[j])
-                        big_sw_store.append(sw[j])
-                        big_et_store.append(et_relative[j])
-                    #plt.plot(sw_store, et_store, "o")
+            #print (site, yr, lat, lon, pft, clim_cl, clim_grp, name, country)
+            df = pd.read_csv(fname, index_col='date',
+                             parse_dates={'date': ["Year","DoY","Time"]},
+                             date_parser=self.date_converter)
 
-            i = i + 1
+            # files contain a rouge date from the following year, fix it.
+            df = self.fix_rogue_date(df, drop=True)
 
-        x = np.asarray(big_sw_store)
-        y = np.asarray(big_et_store)
+            # Convert some units.
+            df['VPD_f'] *= self.HPA_TO_KPA # kPa
+
+            # mm / 30 min
+            df["ET"] = (df['LE_f'] * self.WM2_TO_KG_M2_S * self.SEC_2_HFHR)
+
+            (ppt, et, sw) = self.estimate_soil_water_bucket(df)
+
+            et_max = et.max()
+            et_relative = et / et_max
+
+
+            i = 0
+            N = 10
+            while (i < len(ppt)-(N*2)):
+
+                # Find rain event
+                if ppt[i] > 0.0:
+
+                    # check if we have at least N days without rain. The N is
+                    # arbitary
+                    for j in range(i, i+N):
+                        if ppt[j] > 0.0:
+                            i = j
+                            continue
+                    else:
+                        # ignore the 2 days following rain to minimise soil evap
+                        # contributions
+
+                        et_store = []
+                        sw_store = []
+                        for j in range(i+2, i+N):
+
+                            #print(sw[j], et_relative[j])
+                            et_store.append(et_relative[j])
+                            sw_store.append(sw[j])
+                            big_sw_store.append(sw[j])
+                            big_et_store.append(et_relative[j])
+                        #plt.plot(sw_store, et_store, "o")
+
+                i = i + 1
+
+            x = np.asarray(big_sw_store)
+            y = np.asarray(big_et_store)
+
 
         df = pd.DataFrame({'sw':x, 'beta':y})
         #df.to_csv("/Users/mdekauwe/Desktop/crap.csv", index=False)
