@@ -19,28 +19,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import calendar
 import datetime as dt
-import pymc3 as pm3
 import pandas as pd
-from theano import tensor as tt
-from scipy import optimize
-from scipy.stats.mstats import mquantiles
 
-plt.style.use("ggplot")
-
-def tt_sigmoid(x, a, b):
-    """
-    Sigmoid function using tensor
-    """
-    return 1.0 / (1.0 + tt.exp(-a * (x - b)))
-
-def np_sigmoid(x, a, b):
-    return 1.0 / (1.0 + np.exp(-a * (x - b)))
-
+from fit_sigmoid_pymc import fitMe, tt_sigmoid, np_sigmoid, make_plot
 
 class FitFluxnetBeta(object):
 
-    def __init__(self, fdir, adir, ofdir):
+    def __init__(self, fdir, adir, ofdir, site):
 
+        self.site = site
         site_fname = "CommonAnc_LATEST.csv"
         self.flux_dir = fdir
         self.flist = glob.glob(os.path.join(self.flux_dir, "*.csv"))
@@ -61,16 +48,10 @@ class FitFluxnetBeta(object):
 
         df_site_info = pd.read_csv(self.site_fname, encoding="ISO-8859-1")
 
-        #site = "US-Ha1"
-        site = "AU-Tum"
-        #year = "1998"
-        #fname = os.path.join(self.flux_dir,
-        #                     "%s.%s.synth.hourly.allvars.csv" % (site, year))
-
         big_et_store = []
         big_sw_store = []
         for fname in glob.glob(os.path.join(self.flux_dir,
-                               "%s.*.synth.hourly.allvars.csv" % (site))):
+                               "%s.*.synth.hourly.allvars.csv" % (self.site))):
 
 
 
@@ -140,48 +121,7 @@ class FitFluxnetBeta(object):
         #df.beta = np.where(df.sw>screen, np.max(df.beta), df.beta)
         df.beta = np.where(df.sw>screen, 1.0, df.beta)
 
-        with pm3.Model() as sig_model:
-            a = pm3.Normal('a', mu=0, sd=1e2)
-            b = pm3.Normal('b', mu=0, sd=1e2)
-            sigma = pm3.Uniform('sigma', lower=0, upper=1000)
-            weight = df.sw.values**0.5/sigma
-            model = tt_sigmoid(df.sw.values, a, b)
-            error = pm3.Normal('error', mu=model, sd=weight,
-                               observed=df.beta.values)
-
-        with sig_model:
-            # find an optimal start position
-            start = pm3.find_MAP(model=sig_model.model,
-                                 fmin=optimize.fmin_powell)
-            step = pm3.Metropolis()
-            mcmc_traces = pm3.sample(5e4, step=step, start=start, njobs=-1)
-
-        pm3.traceplot(mcmc_traces)
-
-        # posteriors for the parameters
-        a_post = mcmc_traces["a"][:, None]
-        b_post = mcmc_traces["b"][:, None]
-
-        # dimension to plot along
-        swx = np.linspace(400, 650, 1000)[:, None]
-
-        # mean prediction
-        beta_pred = np_sigmoid(swx.T, a_post, b_post)
-        mean_pred = beta_pred.mean(axis=0)
-
-        # vectorized bottom and top 2.5% quantiles for "confidence interval"
-        qs = mquantiles(beta_pred, [0.025, 0.975], axis=0)
-
-        plt.figure(figsize=(10, 6))
-        plt.fill_between(swx[:, 0], *qs, alpha=0.7, color="salmon")
-        plt.plot(swx, mean_pred, lw=2, ls="-", color="crimson")
-        plt.scatter(df.sw.values, df.beta.values, color="k", s=50, alpha=0.5)
-        plt.xlim(swx.min(), swx.max())
-        plt.ylim(-0.02, 1.02)
-        plt.xlabel("SW")
-        plt.ylabel("Beta")
-        plt.legend(loc="upper left")
-        plt.show()
+        fitMe(df)
 
 
 
@@ -269,7 +209,10 @@ class FitFluxnetBeta(object):
 
 if __name__ == "__main__":
 
+    #site = "US-Ha1"
+    site = "AU-Tum"
     F = FitFluxnetBeta(fdir="data/raw_data/LaThuile_fluxnet_data/raw_data",
                        adir="data/raw_data/LaThuile_fluxnet_data/ancillary_files/csv/raw/",
-                       ofdir="data/processed/")
+                       ofdir="data/processed/",
+                       site=site)
     F.main()
