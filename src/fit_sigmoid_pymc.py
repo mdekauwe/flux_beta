@@ -24,12 +24,9 @@ plt.style.use("ggplot")
 def fitMe(df, site, x_range, to_screen=False):
 
     with pm.Model() as sig_model:
-        # Hyperpriors
         a = pm.Normal('a', mu=0, sd=1e2)
         b = pm.Normal('b', mu=0, sd=1e2)
-
-        # model error
-        sigma = pm.Uniform('sigma', lower=0, upper=1000)
+        sigma = pm.Uniform('sigma', lower=0, upper=1000) # model error
         model = tt_sigmoid(df.sw.values, a, b)
         like = pm.Normal('like', mu=model, sd=sigma, observed=df.beta.values)
 
@@ -74,20 +71,32 @@ def make_plot(df, site, mcmc_traces, x_range, to_screen):
     # vectorized bottom and top 2.5% quantiles for "confidence interval"
     qs = mquantiles(beta_pred, [0.025, 0.975], axis=0)
 
-    plt.figure(figsize=(10, 6))
-    plt.fill_between(x_range[:, 0], *qs, alpha=0.7, color="salmon")
-    plt.plot(x_range, mean_pred, lw=2, ls="-", color="crimson")
-    plt.scatter(df.sw.values, df.beta.values, color="k", s=50, alpha=0.5)
-    plt.xlim(x_range.min(), x_range.max())
-    plt.ylim(-0.02, 1.02)
-    plt.xlabel("SW")
-    plt.ylabel("Beta")
-    #plt.legend(loc="upper left")
+
     if to_screen:
         pm.traceplot(mcmc_traces)
+
+        plt.figure(figsize=(10, 6))
+        plt.fill_between(x_range[:, 0], *qs, alpha=0.7, color="salmon")
+        plt.plot(x_range, mean_pred, lw=2, ls="-", color="crimson")
+        plt.scatter(df.sw.values, df.beta.values, color="k", s=50, alpha=0.5)
+        plt.xlim(x_range.min(), x_range.max())
+        plt.ylim(-0.02, 1.02)
+        plt.xlabel("SW")
+        plt.ylabel("Beta")
         plt.show()
     else:
+        plt.figure(figsize=(10, 6))
+        plt.fill_between(x_range[:, 0], *qs, alpha=0.7, color="salmon")
+        plt.plot(x_range, mean_pred, lw=2, ls="-", color="crimson")
+        plt.scatter(df.sw.values, df.beta.values, color="k", s=50, alpha=0.5)
+        plt.xlim(x_range.min(), x_range.max())
+        plt.ylim(-0.02, 1.02)
+        plt.xlabel("SW")
+        plt.ylabel("Beta")
         plt.savefig("plots/%s.png" % (site), dpi=80)
+
+        pm.traceplot(mcmc_traces)
+        plt.savefig("plots/%s_posterior.png" % (site), dpi=80)
 
 
 if __name__ == "__main__":
