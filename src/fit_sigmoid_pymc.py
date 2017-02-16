@@ -54,11 +54,12 @@ def tt_sigmoid(x, a, b):
     """
     Sigmoid function using tensor
     """
-    return 1.0 / (1.0 + tt.exp(-a * (x - b)))
+    #return 1.0 / (1.0 + tt.exp(-a * (x - b)))
+    return 1.0 / (1.0 + tt.exp(-a * x + b))
 
 def np_sigmoid(x, a, b):
-    return 1.0 / (1.0 + np.exp(-a * (x - b)))
-
+    #return 1.0 / (1.0 + np.exp(-a * (x - b)))
+    return 1.0 / (1.0 + np.exp(np.dot(-a, x) + b))
 
 def make_plot(df, site, mcmc_traces, x_range, to_screen):
 
