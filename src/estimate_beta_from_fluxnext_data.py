@@ -53,8 +53,6 @@ class FitFluxnetBeta(object):
         for fname in glob.glob(os.path.join(self.flux_dir,
                                "%s.*.synth.hourly.allvars.csv" % (self.site))):
 
-
-
             (site, yr, lat, lon,
              pft, clim_cl, clim_grp,
              name, country) = self.get_site_info(df_site_info, fname)
@@ -66,9 +64,6 @@ class FitFluxnetBeta(object):
 
             # files contain a rouge date from the following year, fix it.
             df = self.fix_rogue_date(df, drop=True)
-
-            # Convert some units.
-            df['VPD_f'] *= self.HPA_TO_KPA # kPa
 
             # mm / 30 min
             df["ET"] = (df['LE_f'] * self.WM2_TO_KG_M2_S * self.SEC_2_HFHR)
@@ -123,10 +118,7 @@ class FitFluxnetBeta(object):
 
         # dimension to plot along
         x_range = np.linspace(0, 1000, 100)[:, None]
-        fitMe(df, site, x_range, to_screen=False)
-
-
-
+        fitMe(df, site, x_range, to_screen=True)
 
     def estimate_soil_water_bucket(self, df):
 

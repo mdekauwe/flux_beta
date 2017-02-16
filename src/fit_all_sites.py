@@ -33,6 +33,7 @@ class FitAll(FitFluxnetBeta):
 
         df_site_info = pd.read_csv(self.site_fname, encoding="ISO-8859-1")
 
+        # Grab unique file list so that we can loop over all sites
         sites = glob.glob(os.path.join(self.flux_dir, "*.csv"))
         sites = [os.path.basename(s) for s in sites]
         sites = [s[0:6] for s in sites]
@@ -58,9 +59,6 @@ class FitAll(FitFluxnetBeta):
 
                 # files contain a rouge date from the following year, fix it.
                 df = self.fix_rogue_date(df, drop=True)
-
-                # Convert some units.
-                df['VPD_f'] *= self.HPA_TO_KPA # kPa
 
                 # mm / 30 min
                 df["ET"] = (df['LE_f'] * self.WM2_TO_KG_M2_S * self.SEC_2_HFHR)
@@ -119,10 +117,8 @@ class FitAll(FitFluxnetBeta):
 
 if __name__ == "__main__":
 
-    #site = "US-Ha1"
-    #site = "AU-Tum"
-    #site = "DK-Sor"
-    site = "FI-Hyy"
+
+    site = "blah"
     rooting_depth = 2000.
     F = FitAll(fdir="data/raw_data/LaThuile_fluxnet_data/raw_data",
                adir="data/raw_data/LaThuile_fluxnet_data/ancillary_files/csv/raw/",
