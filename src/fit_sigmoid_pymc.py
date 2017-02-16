@@ -36,10 +36,18 @@ def fitMe(df, site):
         like = pm.Normal('like', mu=model, sd=sigma, observed=df.beta.values)
 
     with sig_model:
-        # find an optimal start position
-        start = pm.find_MAP(model=sig_model.model, fmin=optimize.fmin_powell)
+        try:
+            # find an optimal start position
+            start = pm.find_MAP(model=sig_model.model, fmin=optimize.fmin_powell)
+        except ValueError:
+            return
+
         step = pm.Metropolis()
-        mcmc_traces = pm.sample(5e4, step=step, start=start, njobs=-1)
+
+        try:
+            mcmc_traces = pm.sample(5e4, step=step, start=start, njobs=-1)
+        except ValueError:
+            return
 
     make_plot(df, site, mcmc_traces)
 

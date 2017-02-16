@@ -122,6 +122,7 @@ class FitFluxnetBeta(object):
         df.beta = np.where(df.sw>screen, 1.0, df.beta)
 
         fitMe(df, site)
+        
 
 
 
