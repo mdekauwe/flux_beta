@@ -25,14 +25,14 @@ from fit_sigmoid_pymc import fitMe, tt_sigmoid, np_sigmoid, make_plot
 
 class FitFluxnetBeta(object):
 
-    def __init__(self, fdir, adir, ofdir, site):
+    def __init__(self, fdir, adir, ofdir, site, rooting_depth=2000):
 
         self.site = site
         site_fname = "CommonAnc_LATEST.csv"
         self.flux_dir = fdir
         self.flist = glob.glob(os.path.join(self.flux_dir, "*.csv"))
         self.site_fname = os.path.join(adir, site_fname)
-
+        self.rooting_depth = rooting_depth
         # W/m2 = 1000 (kg/m3) * 2.45 (MJ/kg) * 10^6 (J/kg) * 1 mm/day * \
         #        (1/86400) (day/s) * (1/1000) (mm/m)
         # 2.45 * 1E6 W/m2 = kg/m2/s or mm/s
@@ -121,7 +121,7 @@ class FitFluxnetBeta(object):
         #df.beta = np.where(df.sw>screen, np.max(df.beta), df.beta)
         df.beta = np.where(df.sw>screen, 1.0, df.beta)
 
-        fitMe(df)
+        fitMe(df, site)
 
 
 
@@ -129,8 +129,7 @@ class FitFluxnetBeta(object):
 
         wp = 0.1
         fc = 0.4
-        rooting_depth = 2000 # [mm] assume 2m
-        capacity = (fc - wp) * rooting_depth
+        capacity = (fc - wp) * self.rooting_depth
 
         ppt = df.Precip_f
         ppt = ppt.resample("D").sum()
@@ -210,9 +209,13 @@ class FitFluxnetBeta(object):
 if __name__ == "__main__":
 
     #site = "US-Ha1"
-    site = "AU-Tum"
+    #site = "AU-Tum"
+    #site = "DK-Sor"
+    site = "FI-Hyy"
+    rooting_depth = 2000.
     F = FitFluxnetBeta(fdir="data/raw_data/LaThuile_fluxnet_data/raw_data",
                        adir="data/raw_data/LaThuile_fluxnet_data/ancillary_files/csv/raw/",
                        ofdir="data/processed/",
-                       site=site)
+                       site=site,
+                       rooting_depth=rooting_depth)
     F.main()

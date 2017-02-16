@@ -22,7 +22,7 @@ plt.style.use("ggplot")
 
 
 
-def fitMe(df):
+def fitMe(df, site):
 
     with pm.Model() as sig_model:
         # Hyperpriors
@@ -41,7 +41,7 @@ def fitMe(df):
         step = pm.Metropolis()
         mcmc_traces = pm.sample(5e4, step=step, start=start, njobs=-1)
 
-    make_plot(df, mcmc_traces)
+    make_plot(df, site, mcmc_traces)
 
 def tt_sigmoid(x, a, b):
     """
@@ -52,16 +52,17 @@ def tt_sigmoid(x, a, b):
 def np_sigmoid(x, a, b):
     return 1.0 / (1.0 + np.exp(-a * (x - b)))
 
-def make_plot(df, mcmc_traces):
+def make_plot(df, site, mcmc_traces):
 
-    pm.traceplot(mcmc_traces)
+    #pm.traceplot(mcmc_traces)
 
     # posteriors for the parameters
     a_post = mcmc_traces["a"][:, None]
     b_post = mcmc_traces["b"][:, None]
 
     # dimension to plot along
-    swx = np.linspace(df.sw.min()-5, df.sw.max()+5, 1000)[:, None]
+    #swx = np.linspace(df.sw.min()-5, df.sw.max()+5, 1000)[:, None]
+    swx = np.linspace(0, 1000, 1000)[:, None]
 
     # mean prediction
     beta_pred = np_sigmoid(swx.T, a_post, b_post)
@@ -79,7 +80,8 @@ def make_plot(df, mcmc_traces):
     plt.xlabel("SW")
     plt.ylabel("Beta")
     #plt.legend(loc="upper left")
-    plt.show()
+    #plt.show()
+    plt.savefig("plots/%s.png" % (site), dpi=80)
 
 
 if __name__ == "__main__":
