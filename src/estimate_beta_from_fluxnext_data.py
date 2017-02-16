@@ -117,7 +117,8 @@ class FitFluxnetBeta(object):
         df.beta = np.where(df.sw>screen, 1.0, df.beta)
 
         # dimension to plot along
-        x_range = np.linspace(0, 1000, 100)[:, None]
+        x_range = np.linspace(0, 1000, 100)
+        
         fitMe(df, site, x_range, to_screen=True)
 
     def estimate_soil_water_bucket(self, df):

@@ -65,18 +65,17 @@ def make_plot(df, site, mcmc_traces, x_range, to_screen):
     b_post = mcmc_traces["b"][:, None]
 
     # mean prediction
-    beta_pred = np_sigmoid(x_range.T, a_post, b_post)
-    mean_pred = beta_pred.mean(axis=0)
+    beta_pred = np_sigmoid(x_range, a_post, b_post)
+    mean_pred = beta_pred.mean(0)
 
     # vectorized bottom and top 2.5% quantiles for "confidence interval"
-    qs = mquantiles(beta_pred, [0.025, 0.975], axis=0)
-
+    quantiles = mquantiles(beta_pred, [0.025, 0.975], axis=0)
 
     if to_screen:
         pm.traceplot(mcmc_traces)
 
         plt.figure(figsize=(10, 6))
-        plt.fill_between(x_range[:, 0], *qs, alpha=0.7, color="salmon")
+        plt.fill_between(x_range, *quantiles, alpha=0.7, color="salmon")
         plt.plot(x_range, mean_pred, lw=2, ls="-", color="crimson")
         plt.scatter(df.sw.values, df.beta.values, color="k", s=50, alpha=0.5)
         plt.xlim(x_range.min(), x_range.max())
@@ -86,7 +85,7 @@ def make_plot(df, site, mcmc_traces, x_range, to_screen):
         plt.show()
     else:
         plt.figure(figsize=(10, 6))
-        plt.fill_between(x_range[:, 0], *qs, alpha=0.7, color="salmon")
+        plt.fill_between(x_range, *qs, alpha=0.7, color="salmon")
         plt.plot(x_range, mean_pred, lw=2, ls="-", color="crimson")
         plt.scatter(df.sw.values, df.beta.values, color="k", s=50, alpha=0.5)
         plt.xlim(x_range.min(), x_range.max())
@@ -106,6 +105,7 @@ if __name__ == "__main__":
     y = np.array([0.01, 0.02, 0.04, 0.11, 0.43, 0.7, 0.89, 0.95, 0.99])
     df = pd.DataFrame({'sw':x, 'beta':y})
     # dimension to plot along
-    x_range = np.linspace(df.sw.min()-5, df.sw.max()+5, 100)[:, None]
+    x_range = np.linspace(df.sw.min()-5, df.sw.max()+5, 100)
+
 
     fitMe(df, site, x_range, to_screen=True)
