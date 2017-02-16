@@ -121,8 +121,10 @@ class FitFluxnetBeta(object):
         #df.beta = np.where(df.sw>screen, np.max(df.beta), df.beta)
         df.beta = np.where(df.sw>screen, 1.0, df.beta)
 
-        fitMe(df, site)
-        
+        # dimension to plot along
+        x_range = np.linspace(0, 1000, 100)[:, None]
+        fitMe(df, site, x_range, to_screen=False)
+
 
 
 

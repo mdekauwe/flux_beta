@@ -37,7 +37,7 @@ class FitAll(FitFluxnetBeta):
         sites = [os.path.basename(s) for s in sites]
         sites = [s[0:6] for s in sites]
         sites = np.sort(np.unique(sites))
-        
+
         for site in sites:
             print(site)
             big_et_store = []
@@ -113,7 +113,8 @@ class FitAll(FitFluxnetBeta):
             #df.beta = np.where(df.sw>screen, np.max(df.beta), df.beta)
             df.beta = np.where(df.sw>screen, 1.0, df.beta)
 
-            fitMe(df, site)
+            x_range = np.linspace(0, 1000, 100)[:, None]
+            fitMe(df, site, x_range, to_screen=False)
 
 
 if __name__ == "__main__":
