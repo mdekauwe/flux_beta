@@ -46,13 +46,10 @@ class FitAll(FitFluxnetBeta):
             for fname in glob.glob(os.path.join(self.flux_dir,
                                    "%s.*.synth.hourly.allvars.csv" % (site))):
 
-
-
                 (site, yr, lat, lon,
                  pft, clim_cl, clim_grp,
                  name, country) = self.get_site_info(df_site_info, fname)
 
-                #print (site, yr, lat, lon, pft, clim_cl, clim_grp, name, country)
                 df = pd.read_csv(fname, index_col='date',
                                  parse_dates={'date': ["Year","DoY","Time"]},
                                  date_parser=self.date_converter)
@@ -76,15 +73,15 @@ class FitAll(FitFluxnetBeta):
                     # Find rain event
                     if ppt[i] > 0.0:
 
-                        # check if we have at least N days without rain. The N is
-                        # arbitary
+                        # check if we have at least N days without rain.
+                        # The N is arbitary
                         for j in range(i, i+N):
                             if ppt[j] > 0.0:
                                 i = j
                                 continue
                         else:
-                            # ignore the 2 days following rain to minimise soil evap
-                            # contributions
+                            # ignore the 2 days following rain to minimise soil
+                            # evap contributions
 
                             et_store = []
                             sw_store = []
@@ -106,7 +103,8 @@ class FitAll(FitFluxnetBeta):
             df = pd.DataFrame({'sw':x, 'beta':y})
             #df.to_csv("/Users/mdekauwe/Desktop/crap.csv", index=False)
 
-            # Have points where the soil is full but no or not much ET, screen these
+            # Have points where the soil is full but no or not much ET, screen
+            # these
             screen = np.max(df.sw) * 0.9
             #df.beta = np.where(df.sw>screen, np.max(df.beta), df.beta)
             df.beta = np.where(df.sw>screen, 1.0, df.beta)
