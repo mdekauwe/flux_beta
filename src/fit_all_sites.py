@@ -109,7 +109,7 @@ class FitAll(FitFluxnetBeta):
             #df.beta = np.where(df.sw>screen, np.max(df.beta), df.beta)
             df.beta = np.where(df.sw>screen, 1.0, df.beta)
 
-            x_range = np.linspace(0, 1000, 100)[:, None]
+            x_range = np.linspace(0, 1000, 100)
             fitMe(df, site, x_range, to_screen=False)
 
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
 
     site = "blah"
-    rooting_depth = 2000.
+    rooting_depth = 1000.
     F = FitAll(fdir="data/raw_data/LaThuile_fluxnet_data/raw_data",
                adir="data/raw_data/LaThuile_fluxnet_data/ancillary_files/csv/raw/",
                ofdir="data/processed/",

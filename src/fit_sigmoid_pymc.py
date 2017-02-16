@@ -85,7 +85,7 @@ def make_plot(df, site, mcmc_traces, x_range, to_screen):
         plt.show()
     else:
         plt.figure(figsize=(10, 6))
-        plt.fill_between(x_range, *qs, alpha=0.7, color="salmon")
+        plt.fill_between(x_range, *quantiles, alpha=0.7, color="salmon")
         plt.plot(x_range, mean_pred, lw=2, ls="-", color="crimson")
         plt.scatter(df.sw.values, df.beta.values, color="k", s=50, alpha=0.5)
         plt.xlim(x_range.min(), x_range.max())
