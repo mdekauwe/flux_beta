@@ -93,10 +93,10 @@ def make_plot(df, site, mcmc_traces, x_range, depth, to_screen):
         plt.ylim(-0.02, 1.02)
         plt.xlabel("SW")
         plt.ylabel("Beta")
-        plt.savefig("plots/%s.png" % (site), dpi=80)
+        plt.savefig("plots/%s_%s.png" % (site, depth), dpi=100)
 
         pm.traceplot(mcmc_traces)
-        plt.savefig("plots/%s_%s_posterior.png" % (site, depth), dpi=80)
+        plt.savefig("plots/%s_%s_posterior.png" % (site, depth), dpi=100)
 
 
 if __name__ == "__main__":
