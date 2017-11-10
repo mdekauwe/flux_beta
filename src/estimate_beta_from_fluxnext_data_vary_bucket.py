@@ -214,6 +214,6 @@ if __name__ == "__main__":
                        ofdir="data/processed/",
                        site=site,)
 
-    for depth in np.arange(50, 4000, 100):
+    for depth in np.arange(1000, 6000, 500):
         print(depth)
         F.main(depth)
