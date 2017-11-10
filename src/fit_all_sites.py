@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
 
     site = "blah"
-    rooting_depth = 1000.
+    rooting_depth = 2000.
     F = FitAll(fdir="data/raw_data/LaThuile_fluxnet_data/raw_data",
                adir="data/raw_data/LaThuile_fluxnet_data/ancillary_files/csv/raw/",
                ofdir="data/processed/",
