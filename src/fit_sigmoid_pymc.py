@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 plt.style.use("ggplot")
 
 
-def fitMe(df, site, x_range, to_screen=False):
+def fitMe(df, site, x_range, depth, to_screen=False):
 
     with pm.Model() as sig_model:
         a = pm.Normal('a', mu=0, sd=1e2)
@@ -41,11 +41,11 @@ def fitMe(df, site, x_range, to_screen=False):
         step = pm.Metropolis()
 
         try:
-            mcmc_traces = pm.sample(5e4, step=step, start=start, njobs=-1)
+            mcmc_traces = pm.sample(50000, step=step, start=start, njobs=-1)
         except ValueError:
             return
 
-    make_plot(df, site, mcmc_traces, x_range, to_screen)
+    make_plot(df, site, mcmc_traces, x_range, depth, to_screen)
 
 def tt_sigmoid(x, a, b):
     """
@@ -56,7 +56,7 @@ def tt_sigmoid(x, a, b):
 def np_sigmoid(x, a, b):
     return 1.0 / (1.0 + np.exp(-a * (x - b)))
 
-def make_plot(df, site, mcmc_traces, x_range, to_screen):
+def make_plot(df, site, mcmc_traces, x_range, depth, to_screen):
 
     #pm.traceplot(mcmc_traces)
 
@@ -72,6 +72,7 @@ def make_plot(df, site, mcmc_traces, x_range, to_screen):
     quantiles = mquantiles(beta_pred, [0.025, 0.975], axis=0)
 
     if to_screen:
+
         pm.traceplot(mcmc_traces)
 
         plt.figure(figsize=(10, 6))
@@ -95,7 +96,7 @@ def make_plot(df, site, mcmc_traces, x_range, to_screen):
         plt.savefig("plots/%s.png" % (site), dpi=80)
 
         pm.traceplot(mcmc_traces)
-        plt.savefig("plots/%s_posterior.png" % (site), dpi=80)
+        plt.savefig("plots/%s_%s_posterior.png" % (site, depth), dpi=80)
 
 
 if __name__ == "__main__":
